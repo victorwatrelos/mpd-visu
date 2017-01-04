@@ -9,4 +9,4 @@ INCLUDEPATH += .
 QT += gui
 QT += widgets
 # Input
-SOURCES += hello.cpp
+SOURCES += hello.cpp Reader.cpp

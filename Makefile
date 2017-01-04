@@ -45,8 +45,10 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = hello.cpp 
-OBJECTS       = hello.o
+SOURCES       = hello.cpp \
+		Reader.cpp 
+OBJECTS       = hello.o \
+		Reader.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/shell-unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
@@ -105,7 +107,8 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/lex.prf \
-		dev.pro hello.cpp
+		dev.pro hello.cpp \
+		Reader.cpp
 QMAKE_TARGET  = dev
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = dev
@@ -270,7 +273,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/dev1.0.0 || mkdir -p .tmp/dev1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/dev1.0.0/ && $(COPY_FILE) --parents hello.cpp .tmp/dev1.0.0/ && (cd `dirname .tmp/dev1.0.0` && $(TAR) dev1.0.0.tar dev1.0.0 && $(COMPRESS) dev1.0.0.tar) && $(MOVE) `dirname .tmp/dev1.0.0`/dev1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/dev1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/dev1.0.0/ && $(COPY_FILE) --parents hello.cpp Reader.cpp .tmp/dev1.0.0/ && (cd `dirname .tmp/dev1.0.0` && $(TAR) dev1.0.0.tar dev1.0.0 && $(COMPRESS) dev1.0.0.tar) && $(MOVE) `dirname .tmp/dev1.0.0`/dev1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/dev1.0.0
 
 
 clean:compiler_clean 
@@ -311,6 +314,9 @@ compiler_clean:
 
 hello.o: hello.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hello.o hello.cpp
+
+Reader.o: Reader.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Reader.o Reader.cpp
 
 ####### Install
 
