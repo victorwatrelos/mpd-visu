@@ -5,8 +5,14 @@
 TEMPLATE = app
 TARGET = dev
 INCLUDEPATH += .
+HEADERS += Spectre.hpp VisuWidget.hpp
+QMAKE_CFLAGS_RELEASE -= -O2
+PRE_TARGETDEPS += ./libfft.a
+
+
+LIBS += -L./ -lfft -lm
 
 QT += gui
 QT += widgets
 # Input
-SOURCES += hello.cpp Reader.cpp
+SOURCES += hello.cpp Spectre.cpp VisuWidget.cpp

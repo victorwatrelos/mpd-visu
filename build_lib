@@ -1,0 +1,3 @@
+#!/bin/sh
+gcc -c -o fft.o fft.c -g -Wall
+ar rcs libfft.a fft.o

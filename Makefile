@@ -13,12 +13,12 @@ MAKEFILE      = Makefile
 CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
+CFLAGS        = -pipe -Wall -W -D_REENTRANT -fPIE $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT -fPIE $(DEFINES)
 INCPATH       = -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I. -I. -isystem /usr/include/arm-linux-gnueabihf/qt5 -isystem /usr/include/arm-linux-gnueabihf/qt5/QtWidgets -isystem /usr/include/arm-linux-gnueabihf/qt5/QtGui -isystem /usr/include/arm-linux-gnueabihf/qt5/QtCore -I.
 LINK          = g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS) -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
+LIBS          = $(SUBLIBS) -L./ -lfft -lm -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/lib/arm-linux-gnueabihf/qt5/bin/qmake
@@ -46,9 +46,14 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = hello.cpp \
-		Reader.cpp 
+		Spectre.cpp \
+		VisuWidget.cpp moc_Spectre.cpp \
+		moc_VisuWidget.cpp
 OBJECTS       = hello.o \
-		Reader.o
+		Spectre.o \
+		VisuWidget.o \
+		moc_Spectre.o \
+		moc_VisuWidget.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/shell-unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
@@ -108,7 +113,8 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/lex.prf \
 		dev.pro hello.cpp \
-		Reader.cpp
+		Spectre.cpp \
+		VisuWidget.cpp
 QMAKE_TARGET  = dev
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = dev
@@ -138,7 +144,7 @@ first: all
 
 all: Makefile $(TARGET)
 
-$(TARGET):  $(OBJECTS)  
+$(TARGET): ./libfft.a $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: dev.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
@@ -273,7 +279,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/dev1.0.0 || mkdir -p .tmp/dev1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/dev1.0.0/ && $(COPY_FILE) --parents hello.cpp Reader.cpp .tmp/dev1.0.0/ && (cd `dirname .tmp/dev1.0.0` && $(TAR) dev1.0.0.tar dev1.0.0 && $(COMPRESS) dev1.0.0.tar) && $(MOVE) `dirname .tmp/dev1.0.0`/dev1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/dev1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/dev1.0.0/ && $(COPY_FILE) --parents Spectre.hpp VisuWidget.hpp .tmp/dev1.0.0/ && $(COPY_FILE) --parents hello.cpp Spectre.cpp VisuWidget.cpp .tmp/dev1.0.0/ && (cd `dirname .tmp/dev1.0.0` && $(TAR) dev1.0.0.tar dev1.0.0 && $(COMPRESS) dev1.0.0.tar) && $(MOVE) `dirname .tmp/dev1.0.0`/dev1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/dev1.0.0
 
 
 clean:compiler_clean 
@@ -296,8 +302,16 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all:
+compiler_moc_header_make_all: moc_Spectre.cpp moc_VisuWidget.cpp
 compiler_moc_header_clean:
+	-$(DEL_FILE) moc_Spectre.cpp moc_VisuWidget.cpp
+moc_Spectre.cpp: fft.h \
+		Spectre.hpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/dev -I/home/pi/dev -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/arm-linux-gnueabihf/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/arm-linux-gnueabihf/4.9/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/4.9/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Spectre.hpp -o moc_Spectre.cpp
+
+moc_VisuWidget.cpp: VisuWidget.hpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/dev -I/home/pi/dev -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/arm-linux-gnueabihf/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/arm-linux-gnueabihf/4.9/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/4.9/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include VisuWidget.hpp -o moc_VisuWidget.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
 compiler_uic_make_all:
@@ -308,15 +322,27 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: 
+compiler_clean: compiler_moc_header_clean 
 
 ####### Compile
 
-hello.o: hello.cpp 
+hello.o: hello.cpp Spectre.hpp \
+		fft.h \
+		VisuWidget.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o hello.o hello.cpp
 
-Reader.o: Reader.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Reader.o Reader.cpp
+Spectre.o: Spectre.cpp fft.h \
+		Spectre.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Spectre.o Spectre.cpp
+
+VisuWidget.o: VisuWidget.cpp VisuWidget.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o VisuWidget.o VisuWidget.cpp
+
+moc_Spectre.o: moc_Spectre.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_Spectre.o moc_Spectre.cpp
+
+moc_VisuWidget.o: moc_VisuWidget.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_VisuWidget.o moc_VisuWidget.cpp
 
 ####### Install
 
